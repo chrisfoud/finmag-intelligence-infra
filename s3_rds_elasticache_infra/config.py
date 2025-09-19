@@ -83,7 +83,7 @@ INTELLIGENCE_BUCKET = S3Config(
     S3_LIFECYCLE_RULES = [s3.LifecycleRule(abort_incomplete_multipart_upload_after=Duration.days(7))]
 )
 
-BUCKET_LIST = [INTELLIGENCE_BUCKET]
+BUCKET_LIST = []
 
 
 ################################################################
@@ -161,7 +161,7 @@ ELASTICACHE_LIST = [INTELLIGENCE_REDIS_CACHE]
 # amazonq-ignore-next-line
 INTELLIGENCE_RDS_INSTANCE = RDSConfig(
     RDS_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-postgre-RDS',
-    RDS_DATABASE_NAME= common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-postgre-RDS',
+    RDS_DATABASE_NAME= 'stagintelligencedb',
     RDS_USERNAME = 'XXXXX',
     RDS_ENGINE_VERSION = rds.PostgresEngineVersion.VER_16_3,
     RDS_INSTANCE_TYPE = 't4g.small',

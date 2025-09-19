@@ -24,12 +24,16 @@ class S3_RDS_Elasticache(Stack):
         imported_vpc = ec2.Vpc.from_lookup(self, 'ImportedVpcId', vpc_id = imported_vpc_id,)
 
         ######################################################################################################
-        # Import existing S3 Buckets
-        # for s3_conf in config.BUCKET_LIST:
-        #     bucket = s3.Bucket.from_bucket_name(self,
-        #         s3_conf.S3_BUCKET_ID,
-        #         bucket_name = s3_conf.S3_BUCKET_NAME
-        #     )
+        # Create S3 Buckets
+        for s3_conf in config.BUCKET_LIST:
+            bucket = s3.Bucket(self,
+                s3_conf.S3_BUCKET_ID,
+                bucket_name = s3_conf.S3_BUCKET_NAME,
+                block_public_access = s3.BlockPublicAccess.BLOCK_ALL,
+                removal_policy=s3_conf.S3_REMOVAL_POLICY,
+                encryption = s3_conf.S3_ENCRYPTION,
+                lifecycle_rules = s3_conf.S3_LIFECYCLE_RULES
+            )
 
         
         ######################################################################################################
@@ -90,7 +94,6 @@ class S3_RDS_Elasticache(Stack):
                 automatic_failover_enabled = redis_conf.ELASTICACHE_AUTOMATIC_FAILOVER_ENABLED,
                 port = redis_conf.ELASTICACHE_PORT,
                 cache_subnet_group_name = redis_subnet_group.ref,
-                # amazonq-ignore-next-line
                 security_group_ids = [elasticache_security_group.security_group_id],
                 at_rest_encryption_enabled = redis_conf.ELASTICACHE_AT_REST_ENCRYPTION_ENABLED,
                 transit_encryption_enabled = redis_conf.ELASTICACHE_TRANSIT_ENCRYPTION_ENABLED,
