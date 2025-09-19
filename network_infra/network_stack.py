@@ -22,8 +22,9 @@ class NetworkStack(Stack):
 ###################################################################################
 
         ## VPC Configuration
+        vpcs = {}
         for vpc_conf in config.VPC_LIST:
-            self.vpc = ec2.Vpc(
+            vpc = ec2.Vpc(
                 self, vpc_conf.VPC_ID,
                 vpc_name = vpc_conf.VPC_NAME,
                 ip_addresses = ec2.IpAddresses.cidr(vpc_conf.VPC_CIDR),   # VPC's CIDR block range
@@ -39,28 +40,33 @@ class NetworkStack(Stack):
                 ]
             )
 
+            vpcs[vpc_conf.VPC_NAME] = vpc
+            
             vpc_id_parameter = ssm.StringParameter(
                 self, f'{vpc_conf.VPC_NAME}-vpc-id',
                 parameter_name = '/' + common_config.ENV + '/' + vpc_conf.VPC_NAME + '/' + 'vpc-id',
-                string_value = self.vpc.vpc_id,
+                string_value = vpc.vpc_id,
                 description = 'VPC ID Parameter'
             )
 
         
         ######################################################################################################
         # Create Security Groups
-        security_groups = {}
+
+
 
         for sg_conf in config.SG_LIST:
+            
+            sg_vpc = vpcs[sg_conf.SG_VPC_NAME]
+
             sg = ec2.SecurityGroup(
                 self, sg_conf.SG_ID,
                 security_group_name = sg_conf.SG_NAME,
                 description = sg_conf.SG_DESCRIPTION,
-                vpc = imported_vpc,
+                vpc = sg_vpc,
                 allow_all_outbound = sg_conf.SG_ALLOW_ALL_OUTBOUND,
                 allow_all_ipv6_outbound = sg_conf.SG_ALLOW_ALL_IPV6_OUTBOUND
             )
-            security_groups[sg_conf.SG_NAME] = sg
             for ingress_rule in sg_conf.SG_INGRESS_RULES:
                 sg.add_ingress_rule(
                     peer = ingress_rule.INGRESS_RULE_PEER,

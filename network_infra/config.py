@@ -39,6 +39,7 @@ class SgConfig:
     SG_ID: str
     SG_NAME: str
     SG_DESCRIPTION: str
+    SG_VPC_NAME : str
     SG_ALLOW_ALL_OUTBOUND: bool
     SG_ALLOW_ALL_IPV6_OUTBOUND: bool
     SG_INGRESS_RULES: list[IngressRuleConfig]
@@ -93,6 +94,7 @@ INTELLIGENCE_SG_RDS = SgConfig(
     SG_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-rds-sg',
     SG_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-rds-sg',
     SG_DESCRIPTION = 'RDS security group',
+    SG_VPC_NAME = INTELLIGENCE_VPC.VPC_NAME,
     SG_ALLOW_ALL_OUTBOUND = True,
     SG_ALLOW_ALL_IPV6_OUTBOUND = True,
     SG_INGRESS_RULES = [
@@ -113,6 +115,7 @@ INTELLIGENCE_SG_REDIS = SgConfig(
     SG_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-REDIS-sg',
     SG_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-REDIS-sg',
     SG_DESCRIPTION = 'Redis SG',
+    SG_VPC_NAME = INTELLIGENCE_VPC.VPC_NAME,
     SG_ALLOW_ALL_OUTBOUND = True,
     SG_ALLOW_ALL_IPV6_OUTBOUND = True,
     SG_INGRESS_RULES = [
