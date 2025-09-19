@@ -24,17 +24,12 @@ class S3_RDS_Elasticache(Stack):
         imported_vpc = ec2.Vpc.from_lookup(self, 'ImportedVpcId', vpc_id = imported_vpc_id,)
 
         ######################################################################################################
-        # Create S3 Buckets
-        for s3_conf in config.BUCKET_LIST:
-            # amazonq-ignore-next-line
-            bucket = s3.Bucket(self,
-                s3_conf.S3_BUCKET_ID,
-                bucket_name = s3_conf.S3_BUCKET_NAME,
-                block_public_access = s3.BlockPublicAccess.BLOCK_ALL,
-                removal_policy=s3_conf.S3_REMOVAL_POLICY,
-                encryption = s3_conf.S3_ENCRYPTION,
-                lifecycle_rules = s3_conf.S3_LIFECYCLE_RULES
-            )
+        # Import existing S3 Buckets
+        # for s3_conf in config.BUCKET_LIST:
+        #     bucket = s3.Bucket.from_bucket_name(self,
+        #         s3_conf.S3_BUCKET_ID,
+        #         bucket_name = s3_conf.S3_BUCKET_NAME
+        #     )
 
         
         ######################################################################################################
