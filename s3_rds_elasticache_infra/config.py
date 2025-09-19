@@ -58,20 +58,13 @@ class SgConfig:
 @dataclass
 class RDSConfig:
     RDS_ID: str
+    RDS_DATABASE_NAME: str
     RDS_USERNAME: str
     RDS_ENGINE_VERSION: rds.PostgresEngineVersion
     RDS_INSTANCE_TYPE: str
     RDS_SECURITY_GROUP_NAME: list[str]
     RDS_ALLOCATED_STORAGE: int
-    RDS_STORAGE_TYPE: rds.StorageType
-    RDS_MULTI_AZ: bool
-    RDS_SUBNET_GROUP_NAME: str
     RDS_DATABASE_NAME: str
-    RDS_MASTER_USERNAME: str
-    RDS_MASTER_USER_PASSWORD_CFN_ID: str
-    RDS_MASTER_USER_PASSWORD_DESCRIPTION: str
-    RDS_BACKUP_RETENTION: Duration
-    RDS_DELETION_PROTECTION: bool
    
 
 #################################################################
@@ -150,12 +143,13 @@ SG_LIST = [INTELLIGENCE_SG_RDS]
 
 # amazonq-ignore-next-line
 INTELLIGENCE_RDS_INSTANCE = RDSConfig(
-    RDS_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-RDS',
+    RDS_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-postgre-RDS',
+    RDS_DATABASE_NAME= common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-postgre-RDS',
     RDS_USERNAME = 'XXXXX',
     RDS_ENGINE_VERSION = rds.PostgresEngineVersion.VER_16_3,
     RDS_INSTANCE_TYPE = 't4g.small',
     RDS_SECURITY_GROUP_NAME = [INTELLIGENCE_SG_RDS.SG_NAME],
-    RDS_ALLOCATED_STORAGE = 20,
+    RDS_ALLOCATED_STORAGE = 20
     )
 
 RDS_LIST = [INTELLIGENCE_RDS_INSTANCE]

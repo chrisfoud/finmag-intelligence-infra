@@ -132,6 +132,8 @@ class S3_RDS_Elasticache(Stack):
             # amazonq-ignore-next-line
             rds_instance = rds.DatabaseInstance(
                 self, rds_conf.RDS_ID,
+                database_name = rds_conf.RDS_DATABASE_NAME,
+                instance_identifier = rds_conf.RDS_ID,
                 credentials = rds_credentials,
                 engine = rds.DatabaseInstanceEngine.postgres(version=rds_conf.RDS_ENGINE_VERSION),
                 instance_type = ec2.InstanceType(rds_conf.RDS_INSTANCE_TYPE),
