@@ -160,9 +160,9 @@ Resources:
                 - Name: Network-BuildArtifact
               RunOrder: 1
 
-        - Name: S3-RDS-Elasticache-Build
+        - Name: S3-RDS-Redis-Build
           Actions:
-            - Name: BuildAction
+            - Name: S3BuildAction
               ActionTypeId:
                 Category: Build
                 Owner: AWS
@@ -170,13 +170,47 @@ Resources:
                 Version: 1
               Configuration:
                 ProjectName: 
-                  Ref: CodeBuildS3RDSElasticache
+                  Ref: CodeBuildS3
                 PrimarySource: SourceArtifact
               InputArtifacts:
                 - Name: SourceArtifact
                 - Name: Network-BuildArtifact
               OutputArtifacts:
-                - Name: S3-RDS-Elasticache-BuildArtifact
+                - Name: S3-BuildArtifact
+              RunOrder: 1      
+
+            - Name: RDSBuildAction
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName: 
+                  Ref: CodeBuildRDS
+                PrimarySource: SourceArtifact
+              InputArtifacts:
+                - Name: SourceArtifact
+                - Name: Network-BuildArtifact
+              OutputArtifacts:
+                - Name: RDS-BuildArtifact
+              RunOrder: 1    
+
+            - Name: RedisBuildAction
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName: 
+                  Ref: CodeBuildredis
+                PrimarySource: SourceArtifact
+              InputArtifacts:
+                - Name: SourceArtifact
+                - Name: Network-BuildArtifact
+              OutputArtifacts:
+                - Name: Redis-BuildArtifact
               RunOrder: 1      
 
   # Add CodeBuild Project and Role
@@ -314,18 +348,18 @@ Resources:
       Cache:
         Type: NO_CACHE
 
-  CodeBuildS3RDSElasticache:
+  CodeBuildS3:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: 
-        Fn::Sub: "${AWS::StackName}-s3-rds-elasticache-build"
+        Fn::Sub: "${AWS::StackName}-s3-rds-redis-build"
       ServiceRole: 
         Fn::GetAtt: [CodeBuildServiceRole, Arn]
       Artifacts:
         Type: CODEPIPELINE
       Source:
         Type: CODEPIPELINE
-        BuildSpec: buildspec-s3-rds-elasticache.yaml
+        BuildSpec: buildspec-s3.yaml
       Environment:
         Type: LINUX_CONTAINER
         ComputeType: BUILD_GENERAL1_SMALL
@@ -345,6 +379,70 @@ Resources:
             Value: !Sub '${CommonName}'
       Cache:
         Type: NO_CACHE
+
+  CodeBuildRDS:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: 
+        Fn::Sub: "${AWS::StackName}-s3-rds-redis-build"
+      ServiceRole: 
+        Fn::GetAtt: [CodeBuildServiceRole, Arn]
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec-rds.yaml
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        EnvironmentVariables:
+          - Name: EnvName
+            Type: PLAINTEXT
+            Value: !Sub '${EnvName}'
+          - Name: GitRepositoryName
+            Type: PLAINTEXT
+            Value: !Sub '${GitRepositoryName}'
+          - Name: ApplicationName
+            Type: PLAINTEXT
+            Value: !Sub '${ApplicationName}'   
+          - Name: CommonName
+            Type: PLAINTEXT
+            Value: !Sub '${CommonName}'
+      Cache:
+        Type: NO_CACHE
+
+  CodeBuildRedis:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: 
+        Fn::Sub: "${AWS::StackName}-s3-rds-redis-build"
+      ServiceRole: 
+        Fn::GetAtt: [CodeBuildServiceRole, Arn]
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec-redis.yaml
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        EnvironmentVariables:
+          - Name: EnvName
+            Type: PLAINTEXT
+            Value: !Sub '${EnvName}'
+          - Name: GitRepositoryName
+            Type: PLAINTEXT
+            Value: !Sub '${GitRepositoryName}'
+          - Name: ApplicationName
+            Type: PLAINTEXT
+            Value: !Sub '${ApplicationName}'   
+          - Name: CommonName
+            Type: PLAINTEXT
+            Value: !Sub '${CommonName}'
+      Cache:
+        Type: NO_CACHE                
 
 Outputs:
   PipelineURL:

@@ -13,17 +13,10 @@ from constructs import Construct
 from s3_rds_elasticache_infra import config
 import common_config
 
-class S3_RDS_Elasticache(Stack):
+class S3(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs: Any) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        ######################################################################################################
-        # Import VPC IDs
-        imported_vpc_id = ssm.StringParameter.value_from_lookup(self, '/' + common_config.ENV + '/' + config.IMPORTED_VPC_NAME + '/' + 'vpc-id')
-        
-        imported_vpc = ec2.Vpc.from_lookup(self, 'ImportedVpcId', vpc_id = imported_vpc_id,)
-
-        ######################################################################################################
         # Create S3 Buckets
         for s3_conf in config.BUCKET_LIST:
             bucket = s3.Bucket(self,
@@ -35,48 +28,39 @@ class S3_RDS_Elasticache(Stack):
                 lifecycle_rules = s3_conf.S3_LIFECYCLE_RULES
             )
 
+
+class Redis(Stack):
+    def __init__(self, scope: Construct, construct_id: str, **kwargs: Any) -> None:
+        super().__init__(scope, construct_id, **kwargs)
+
+        ######################################################################################################
+        # Import VPC IDs
+        imported_vpc_id = ssm.StringParameter.value_from_lookup(self, '/' + common_config.ENV + '/' + config.IMPORTED_VPC_NAME + '/' + 'vpc-id')
         
-        ######################################################################################################
-        # Create Security Groups
-        security_groups = {}
-
-        for sg_conf in config.SG_LIST:
-            sg = ec2.SecurityGroup(
-                self, sg_conf.SG_ID,
-                security_group_name = sg_conf.SG_NAME,
-                description = sg_conf.SG_DESCRIPTION,
-                vpc = imported_vpc,
-                allow_all_outbound = sg_conf.SG_ALLOW_ALL_OUTBOUND,
-                allow_all_ipv6_outbound = sg_conf.SG_ALLOW_ALL_IPV6_OUTBOUND
-            )
-            security_groups[sg_conf.SG_NAME] = sg
-            for ingress_rule in sg_conf.SG_INGRESS_RULES:
-                sg.add_ingress_rule(
-                    peer = ingress_rule.INGRESS_RULE_PEER,
-                    connection = ingress_rule.INGRESS_RULE_PORT,
-                    description = ingress_rule.INGRESS_RULE_DESCRIPTION
-                )
-
+        imported_vpc = ec2.Vpc.from_lookup(self, 'ImportedVpcId', vpc_id = imported_vpc_id,)
 
         ######################################################################################################
-        # Create ElastiCache
-        for redis_conf in config.ELASTICACHE_LIST:
+        # Create Redis
+        for redis_conf in config.REDIS_LIST:
 
-            elasticache_security_group = security_groups[redis_conf.ELASTICACHE_SECURITY_GROUP_NAME]
+            redis_security_group = []
+            for sg_name in redis_conf.REDIS_SECURITY_GROUP_NAME:
+                redis_security_group.append(ec2.SecurityGroup.from_lookup_by_name(self, f'ImportedSG-{sg_name}', sg_name,imported_vpc))
+
 
             redis_subnet_group = elasticache.CfnSubnetGroup(
-                self, redis_conf.ELASTICACHE_ID + '-subnet-group',
-                cache_subnet_group_name = redis_conf.ELASTICACHE_ID + '-subnet-group',
+                self, redis_conf.REDIS_ID + '-subnet-group',
+                cache_subnet_group_name = redis_conf.REDIS_ID + '-subnet-group',
                 description = "Redis Cache Subnet Group",
                 subnet_ids = imported_vpc.select_subnets(subnet_type=ec2.SubnetType.PRIVATE_ISOLATED).subnet_ids,
             )
 
             redis_auth_token = secretsmanager.Secret(self, 
-                redis_conf.ELASTICACHE_AUTH_TOKEN_CFN_ID,
-                description=redis_conf.ELASTICACHE_AUTH_TOKEN_DESCRIPTION,
+                redis_conf.REDIS_AUTH_TOKEN_CFN_ID,
+                description=redis_conf.REDIS_AUTH_TOKEN_DESCRIPTION,
                 generate_secret_string=secretsmanager.SecretStringGenerator(
-                    password_length= redis_conf.ELASTICACHE_AUTH_TOKEN_LENGTH,
-                    exclude_characters= redis_conf.ELASTICACHE_AUTH_TOKEN_EXCLUDE_CHARS,
+                    password_length= redis_conf.REDIS_AUTH_TOKEN_LENGTH,
+                    exclude_characters= redis_conf.REDIS_AUTH_TOKEN_EXCLUDE_CHARS,
                     exclude_punctuation=True,
                     include_space=False
                 )
@@ -85,21 +69,31 @@ class S3_RDS_Elasticache(Stack):
 
             # amazonq-ignore-next-line
             redis_cluster = elasticache.CfnReplicationGroup(
-                self, redis_conf.ELASTICACHE_ID,
-                replication_group_id = redis_conf.ELASTICACHE_ID,
-                replication_group_description = redis_conf.ELASTICACHE_DESCRIPTION,
-                engine = redis_conf.ELASTICACHE_ENGINE,
-                cache_node_type = redis_conf.ELASTICACHE_NODE_TYPE,
-                num_node_groups = redis_conf.ELASTICACHE_NUM_NODES,
-                automatic_failover_enabled = redis_conf.ELASTICACHE_AUTOMATIC_FAILOVER_ENABLED,
+                self, redis_conf.REDIS_ID,
+                replication_group_id = redis_conf.REDIS_ID,
+                replication_group_description = redis_conf.REDIS_DESCRIPTION,
+                engine = redis_conf.REDIS_ENGINE,
+                cache_node_type = redis_conf.REDIS_NODE_TYPE,
+                num_node_groups = redis_conf.REDIS_NUM_NODES,
+                automatic_failover_enabled = redis_conf.REDIS_AUTOMATIC_FAILOVER_ENABLED,
                 port = redis_conf.ELASTICACHE_PORT,
                 cache_subnet_group_name = redis_subnet_group.ref,
-                security_group_ids = [elasticache_security_group.security_group_id],
+                security_group_ids = [redis_security_group],
                 at_rest_encryption_enabled = redis_conf.ELASTICACHE_AT_REST_ENCRYPTION_ENABLED,
                 transit_encryption_enabled = redis_conf.ELASTICACHE_TRANSIT_ENCRYPTION_ENABLED,
                 auth_token = redis_auth_token.secret_value.unsafe_unwrap(),
             )
 
+
+class RDS(Stack):
+    def __init__(self, scope: Construct, construct_id: str, **kwargs: Any) -> None:
+        super().__init__(scope, construct_id, **kwargs)
+
+        ######################################################################################################
+        # Import VPC IDs
+        imported_vpc_id = ssm.StringParameter.value_from_lookup(self, '/' + common_config.ENV + '/' + config.IMPORTED_VPC_NAME + '/' + 'vpc-id')
+        
+        imported_vpc = ec2.Vpc.from_lookup(self, 'ImportedVpcId', vpc_id = imported_vpc_id,)
 
         ######################################################################################################
         # RDS Instance Creation
@@ -107,7 +101,7 @@ class S3_RDS_Elasticache(Stack):
             
             rds_security_groups = []
             for sg_name in rds_conf.RDS_SECURITY_GROUP_NAME:
-                rds_security_groups.append(security_groups[sg_name])
+                rds_security_groups.append(ec2.SecurityGroup.from_lookup_by_name(self, f'ImportedSG-{sg_name}', sg_name,imported_vpc))
 
             rds_subnet_group = rds.SubnetGroup(
                 self, rds_conf.RDS_ID + '-subnet-group',

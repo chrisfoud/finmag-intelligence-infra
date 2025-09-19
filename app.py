@@ -4,7 +4,9 @@ import os
 
 from aws_cdk import App, Environment
 from network_infra.network_stack import NetworkStack
-from s3_rds_elasticache_infra.s3_rds_elasticahce_stack import S3_RDS_Elasticache
+from s3_rds_elasticache_infra.s3_rds_elasticahce_stack import S3
+from s3_rds_elasticache_infra.s3_rds_elasticahce_stack import RDS
+from s3_rds_elasticache_infra.s3_rds_elasticahce_stack import Redis
 
 app = App()
 
@@ -15,10 +17,13 @@ env = cdk.Environment(
 )
 
 network_stack = NetworkStack(app, "Network-Stack", env=env)
-s3_rds_elasticache = S3_RDS_Elasticache(app, "S3-RDS-Elasticache-Stack", env=env)
+s3_stack = S3(app, "S3-Stack", env=env)
+rds_stack = RDS(app, "RDS-Stack", env=env)
+redis_stack = Redis(app, "Redis-Stack", env=env)
 
 
 # Add dependency when S3-RDS-Elasticache stack is uncommented
-s3_rds_elasticache.add_dependency(network_stack)
+rds_stack.add_dependency(network_stack)
+redis_stack.add_dependency(network_stack)
 
 app.synth()

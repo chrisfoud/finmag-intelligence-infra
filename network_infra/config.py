@@ -28,6 +28,23 @@ class VpcConfig:
     INTERNET_GATEWAY: bool
     SUBNET_LIST: list[SubnetConfig]
 
+@dataclass
+class IngressRuleConfig:
+    INGRESS_RULE_PEER: ec2.IPeer
+    INGRESS_RULE_PORT: ec2.Port
+    INGRESS_RULE_DESCRIPTION: str 
+
+@dataclass
+class SgConfig:
+    SG_ID: str
+    SG_NAME: str
+    SG_DESCRIPTION: str
+    SG_ALLOW_ALL_OUTBOUND: bool
+    SG_ALLOW_ALL_IPV6_OUTBOUND: bool
+    SG_INGRESS_RULES: list[IngressRuleConfig]
+    
+
+
 
 ##############################################################################################
                             # VPC Configurations #
@@ -67,3 +84,44 @@ INTELLIGENCE_VPC = VpcConfig(
 
 
 VPC_LIST = [INTELLIGENCE_VPC]
+
+
+################################################################
+# Security Group Configuration
+
+INTELLIGENCE_SG_RDS = SgConfig(
+    SG_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-rds-sg',
+    SG_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-rds-sg',
+    SG_DESCRIPTION = 'RDS security group',
+    SG_ALLOW_ALL_OUTBOUND = True,
+    SG_ALLOW_ALL_IPV6_OUTBOUND = True,
+    SG_INGRESS_RULES = [
+        IngressRuleConfig(
+            INGRESS_RULE_PEER = ec2.Peer.any_ipv4(),
+            INGRESS_RULE_PORT = ec2.Port.tcp(80),
+            INGRESS_RULE_DESCRIPTION = 'HTTP'
+        ),
+        IngressRuleConfig(
+            INGRESS_RULE_PEER = ec2.Peer.any_ipv6(),
+            INGRESS_RULE_PORT = ec2.Port.tcp(80),
+            INGRESS_RULE_DESCRIPTION = 'HTTP'
+        )
+    ]
+)
+
+INTELLIGENCE_SG_REDIS = SgConfig(
+    SG_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-REDIS-sg',
+    SG_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-REDIS-sg',
+    SG_DESCRIPTION = 'Redis SG',
+    SG_ALLOW_ALL_OUTBOUND = True,
+    SG_ALLOW_ALL_IPV6_OUTBOUND = True,
+    SG_INGRESS_RULES = [
+        IngressRuleConfig(
+            INGRESS_RULE_PEER = ec2.Peer.any_ipv4(),
+            INGRESS_RULE_PORT = ec2.Port.tcp(6379),
+            INGRESS_RULE_DESCRIPTION = 'Redis from ECS services'
+        ),
+    ]
+)
+
+SG_LIST = [INTELLIGENCE_SG_RDS,INTELLIGENCE_SG_REDIS]

@@ -22,38 +22,22 @@ class S3Config:
     S3_LIFECYCLE_RULES: list[s3.LifecycleRule]
 
 @dataclass
-class ElasticacheConfig:
-    ELASTICACHE_ID: str
-    ELASTICACHE_DESCRIPTION: str
-    ELASTICACHE_ENGINE: str
-    ELASTICACHE_NODE_TYPE: str
-    ELASTICACHE_NUM_NODES: int
-    ELASTICACHE_AUTOMATIC_FAILOVER_ENABLED: bool
-    ELASTICACHE_PORT: int
-    ELASTICACHE_PARAMETER_GROUP_NAME: str
-    ELASTICACHE_SUBNET_GROUP_NAME: str
-    ELASTICACHE_SECURITY_GROUP_NAME: str
-    ELASTICACHE_AT_REST_ENCRYPTION_ENABLED: bool
-    ELASTICACHE_TRANSIT_ENCRYPTION_ENABLED: bool
-    ELASTICACHE_AUTH_TOKEN_CFN_ID: str
-    ELASTICACHE_AUTH_TOKEN_DESCRIPTION: str
-    ELASTICACHE_AUTH_TOKEN_LENGTH: int
-    ELASTICACHE_AUTH_TOKEN_EXCLUDE_CHARS: str
+class RedisConfig:
+    REDIS_ID: str
+    REDIS_DESCRIPTION: str
+    REDIS_ENGINE: str
+    REDIS_NODE_TYPE: str
+    REDIS_NUM_NODES: int
+    REDIS_AUTOMATIC_FAILOVER_ENABLED: bool
+    REDIS_PORT: int
+    REDIS_SECURITY_GROUP_NAME: str
+    REDIS_AT_REST_ENCRYPTION_ENABLED: bool
+    REDIS_TRANSIT_ENCRYPTION_ENABLED: bool
+    REDIS_AUTH_TOKEN_CFN_ID: str
+    REDIS_AUTH_TOKEN_DESCRIPTION: str
+    REDIS_AUTH_TOKEN_LENGTH: int
+    REDIS_AUTH_TOKEN_EXCLUDE_CHARS: str
 
-@dataclass
-class IngressRuleConfig:
-    INGRESS_RULE_PEER: ec2.IPeer
-    INGRESS_RULE_PORT: ec2.Port
-    INGRESS_RULE_DESCRIPTION: str 
-
-@dataclass
-class SgConfig:
-    SG_ID: str
-    SG_NAME: str
-    SG_DESCRIPTION: str
-    SG_ALLOW_ALL_OUTBOUND: bool
-    SG_ALLOW_ALL_IPV6_OUTBOUND: bool
-    SG_INGRESS_RULES: list[IngressRuleConfig]
     
 @dataclass
 class RDSConfig:
@@ -86,86 +70,38 @@ INTELLIGENCE_BUCKET = S3Config(
 BUCKET_LIST = []
 
 
-################################################################
-# Security Group Configuration
+#################################################################
 
-INTELLIGENCE_SG_RDS = SgConfig(
-    SG_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-rds-sg',
-    SG_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-rds-sg',
-    SG_DESCRIPTION = 'RDS security group',
-    SG_ALLOW_ALL_OUTBOUND = True,
-    SG_ALLOW_ALL_IPV6_OUTBOUND = True,
-    SG_INGRESS_RULES = [
-        IngressRuleConfig(
-            INGRESS_RULE_PEER = ec2.Peer.any_ipv4(),
-            INGRESS_RULE_PORT = ec2.Port.tcp(80),
-            INGRESS_RULE_DESCRIPTION = 'HTTP'
-        ),
-        IngressRuleConfig(
-            INGRESS_RULE_PEER = ec2.Peer.any_ipv6(),
-            INGRESS_RULE_PORT = ec2.Port.tcp(80),
-            INGRESS_RULE_DESCRIPTION = 'HTTP'
-        )
-    ]
-)
-
-INTELLIGENCE_SG_ELASTICACHE = SgConfig(
-    SG_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-elasticache-sg',
-    SG_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-elasticache-sg',
-    SG_DESCRIPTION = 'Redis SG',
-    SG_ALLOW_ALL_OUTBOUND = True,
-    SG_ALLOW_ALL_IPV6_OUTBOUND = True,
-    SG_INGRESS_RULES = [
-        IngressRuleConfig(
-            INGRESS_RULE_PEER = ec2.Peer.any_ipv4(),
-            INGRESS_RULE_PORT = ec2.Port.tcp(6379),
-            INGRESS_RULE_DESCRIPTION = 'Redis from ECS services'
-        ),
-    ]
-)
-
-SG_LIST = [INTELLIGENCE_SG_RDS,INTELLIGENCE_SG_ELASTICACHE]
-
-
-"""
-Configuration for ElastiCache.
-
-Defines ElastiCache characteristics including engine, node type, version, number of nodes, port, parameter group, subnet group, and security group.
-"""
-
-INTELLIGENCE_REDIS_CACHE = ElasticacheConfig(
-    ELASTICACHE_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-Redis-Cache',
-    ELASTICACHE_DESCRIPTION = 'Redis Cache for RDS postgre',
-    ELASTICACHE_ENGINE = 'redis',
-    ELASTICACHE_NODE_TYPE = 'cache.t4g.micro',
-    ELASTICACHE_NUM_NODES = 1,
-    ELASTICACHE_AUTOMATIC_FAILOVER_ENABLED = False,
-    ELASTICACHE_PORT = 6379,
-    ELASTICACHE_PARAMETER_GROUP_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-redis-params',
-    ELASTICACHE_SUBNET_GROUP_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-redis-subnet-group',
-    ELASTICACHE_SECURITY_GROUP_NAME = INTELLIGENCE_SG_ELASTICACHE.SG_NAME,
-    ELASTICACHE_AT_REST_ENCRYPTION_ENABLED= True,   # Enable encryption at rest
-    ELASTICACHE_TRANSIT_ENCRYPTION_ENABLED= True,   # Enable encryption in transit
+INTELLIGENCE_REDIS_CACHE = RedisConfig(
+    REDIS_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-Redis-Cache',
+    REDIS_DESCRIPTION = 'Redis Cache for RDS postgre',
+    REDIS_ENGINE = 'redis',
+    REDIS_NODE_TYPE = 'cache.t4g.micro',
+    REDIS_NUM_NODES = 1,
+    REDIS_AUTOMATIC_FAILOVER_ENABLED = False,
+    REDIS_PORT = 6379,
+    REDIS_SECURITY_GROUP_NAME = network_config.INTELLIGENCE_SG_REDIS.SG_NAME,
+    REDIS_AT_REST_ENCRYPTION_ENABLED= True,   # Enable encryption at rest
+    REDIS_TRANSIT_ENCRYPTION_ENABLED= True,   # Enable encryption in transit
     # Auth token for Redis
-    ELASTICACHE_AUTH_TOKEN_CFN_ID  = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-redis-auth-token',
-    ELASTICACHE_AUTH_TOKEN_DESCRIPTION = 'Redis Auth Token',
-    ELASTICACHE_AUTH_TOKEN_LENGTH  = 32,
-    ELASTICACHE_AUTH_TOKEN_EXCLUDE_CHARS = r'/@"\ '
+    REDIS_AUTH_TOKEN_CFN_ID  = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-redis-auth-token',
+    REDIS_AUTH_TOKEN_DESCRIPTION = 'Redis Auth Token',
+    REDIS_AUTH_TOKEN_LENGTH  = 32,
+    REDIS_AUTH_TOKEN_EXCLUDE_CHARS = r'/@"\ '
 )
 
-ELASTICACHE_LIST = [INTELLIGENCE_REDIS_CACHE]
+REDIS_LIST = [INTELLIGENCE_REDIS_CACHE]
 
 
 #################################################################
 
-# amazonq-ignore-next-line
 INTELLIGENCE_RDS_INSTANCE = RDSConfig(
     RDS_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-postgre-RDS',
     RDS_DATABASE_NAME= 'stagintelligencedb',
     RDS_USERNAME = 'XXXXX',
     RDS_ENGINE_VERSION = rds.PostgresEngineVersion.VER_16_3,
     RDS_INSTANCE_TYPE = 't4g.small',
-    RDS_SECURITY_GROUP_NAME = [INTELLIGENCE_SG_RDS.SG_NAME],
+    RDS_SECURITY_GROUP_NAME = [network_config.INTELLIGENCE_SG_RDS.SG_NAME],
     RDS_ALLOCATED_STORAGE = 20
     )
 

@@ -28,8 +28,8 @@ phases:
       
   build:
     commands:
-      - echo "Deploying Network infrastructure..."
-      - cdk deploy S3-RDS-Elasticache-Stack --require-approval never
+      - echo "Deploying RDS infrastructure..."
+      - cdk deploy RDS-Stack --require-approval never
 
   post_build:
     commands:
