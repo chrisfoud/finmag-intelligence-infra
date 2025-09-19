@@ -39,6 +39,7 @@ class S3_RDS_Elasticache(Stack):
         
         ######################################################################################################
         # Create Security Groups
+        security_groups = {}
 
         for sg_conf in config.SG_LIST:
             sg = ec2.SecurityGroup(
@@ -49,6 +50,7 @@ class S3_RDS_Elasticache(Stack):
                 allow_all_outbound = sg_conf.SG_ALLOW_ALL_OUTBOUND,
                 allow_all_ipv6_outbound = sg_conf.SG_ALLOW_ALL_IPV6_OUTBOUND
             )
+            security_groups[sg_conf.SG_NAME] = sg
             for ingress_rule in sg_conf.SG_INGRESS_RULES:
                 sg.add_ingress_rule(
                     peer = ingress_rule.INGRESS_RULE_PEER,
@@ -61,7 +63,7 @@ class S3_RDS_Elasticache(Stack):
         # Create ElastiCache
         for redis_conf in config.ELASTICACHE_LIST:
 
-            elasticache_security_group = ec2.SecurityGroup.from_lookup_by_name(self, f'ImportedSG-{redis_conf.ELASTICACHE_SECURITY_GROUP_NAME}', redis_conf.ELASTICACHE_SECURITY_GROUP_NAME, imported_vpc)
+            elasticache_security_group = security_groups[redis_conf.ELASTICACHE_SECURITY_GROUP_NAME]
 
             redis_subnet_group = elasticache.CfnSubnetGroup(
                 self, redis_conf.ELASTICACHE_ID + '-subnet-group',
@@ -105,7 +107,7 @@ class S3_RDS_Elasticache(Stack):
             
             rds_security_groups = []
             for sg_name in rds_conf.RDS_SECURITY_GROUP_NAME:
-                rds_security_groups.append(ec2.SecurityGroup.from_lookup_by_name(self, f'ImportedSG-{sg_name}', sg_name,imported_vpc))
+                rds_security_groups.append(security_groups[sg_name])
 
             rds_subnet_group = rds.SubnetGroup(
                 self, rds_conf.RDS_ID + '-subnet-group',
