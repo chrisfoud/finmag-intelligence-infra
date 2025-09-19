@@ -76,11 +76,11 @@ class Redis(Stack):
                 cache_node_type = redis_conf.REDIS_NODE_TYPE,
                 num_node_groups = redis_conf.REDIS_NUM_NODES,
                 automatic_failover_enabled = redis_conf.REDIS_AUTOMATIC_FAILOVER_ENABLED,
-                port = redis_conf.ELASTICACHE_PORT,
+                port = redis_conf.REDIS_PORT,
                 cache_subnet_group_name = redis_subnet_group.ref,
                 security_group_ids = [redis_security_group],
-                at_rest_encryption_enabled = redis_conf.ELASTICACHE_AT_REST_ENCRYPTION_ENABLED,
-                transit_encryption_enabled = redis_conf.ELASTICACHE_TRANSIT_ENCRYPTION_ENABLED,
+                at_rest_encryption_enabled = redis_conf.REDIS_AT_REST_ENCRYPTION_ENABLED,
+                transit_encryption_enabled = redis_conf.REDIS_TRANSIT_ENCRYPTION_ENABLED,
                 auth_token = redis_auth_token.secret_value.unsafe_unwrap(),
             )
 
