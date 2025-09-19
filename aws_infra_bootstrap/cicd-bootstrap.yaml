@@ -204,7 +204,7 @@ Resources:
                 Version: 1
               Configuration:
                 ProjectName: 
-                  Ref: CodeBuildredis
+                  Ref: CodeBuildRedis
                 PrimarySource: SourceArtifact
               InputArtifacts:
                 - Name: SourceArtifact
@@ -352,7 +352,7 @@ Resources:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: 
-        Fn::Sub: "${AWS::StackName}-s3-rds-redis-build"
+        Fn::Sub: "${AWS::StackName}-s3-build"
       ServiceRole: 
         Fn::GetAtt: [CodeBuildServiceRole, Arn]
       Artifacts:
@@ -384,7 +384,7 @@ Resources:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: 
-        Fn::Sub: "${AWS::StackName}-s3-rds-redis-build"
+        Fn::Sub: "${AWS::StackName}-rds-build"
       ServiceRole: 
         Fn::GetAtt: [CodeBuildServiceRole, Arn]
       Artifacts:
@@ -416,7 +416,7 @@ Resources:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: 
-        Fn::Sub: "${AWS::StackName}-s3-rds-redis-build"
+        Fn::Sub: "${AWS::StackName}-redis-build"
       ServiceRole: 
         Fn::GetAtt: [CodeBuildServiceRole, Arn]
       Artifacts:

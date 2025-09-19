@@ -62,7 +62,7 @@ INTELLIGENCE_BUCKET = S3Config(
     S3_BUCKET_ID = 'IntelligenceBucket',
     S3_BUCKET_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME +'-s3',  # Specify your desired bucket name
     S3_BLOCK_PUBLIC_ACCESS = s3.BlockPublicAccess.BLOCK_ALL ,  # Block all public access
-    S3_REMOVAL_POLICY = RemovalPolicy.RETAIN,
+    S3_REMOVAL_POLICY = RemovalPolicy.DESTROY,
     S3_ENCRYPTION = s3.BucketEncryption.S3_MANAGED,  # Enable S3 managed encryption
     S3_LIFECYCLE_RULES = [s3.LifecycleRule(abort_incomplete_multipart_upload_after=Duration.days(7))]
 )
