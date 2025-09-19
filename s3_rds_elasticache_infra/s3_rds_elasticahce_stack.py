@@ -45,7 +45,7 @@ class Redis(Stack):
 
             redis_security_groups = []
             for sg_name in redis_conf.REDIS_SECURITY_GROUP_IDS:
-                redis_security_groups.append(ec2.SecurityGroup.from_lookup_by_name(self, f'ImportedSG-{sg_name}', sg_name,imported_vpc))
+                redis_security_groups.append(ec2.SecurityGroup.from_lookup_by_name(self, f'ImportedSG-{sg_name}', sg_name,imported_vpc).security_group_id)
 
 
             redis_subnet_group = elasticache.CfnSubnetGroup(
