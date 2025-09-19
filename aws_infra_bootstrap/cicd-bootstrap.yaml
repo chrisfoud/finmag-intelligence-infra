@@ -8,7 +8,7 @@ Parameters:
     Description: Enviroment name
     AllowedValues:
       - dev
-      - staging
+      - stag
       - test
       - prod
 
@@ -19,7 +19,7 @@ Parameters:
 
   ApplicationName:
     Type: String
-    Default: inteligence
+    Default: intelligence
     Description: Name of the application.
     
   GitRepositoryOwner:
@@ -42,13 +42,13 @@ Resources:
   CodePipelineConnection:
     Type: AWS::CodeStarConnections::Connection
     Properties:
-      ConnectionName: ${EnvName}-${CommonName}-{ApplicationName}-GitConnection
+      ConnectionName: !Sub "${EnvName}-${CommonName}-${ApplicationName}-GitConn"
       ProviderType: GitHub
 
   CodePipelineArtifactsBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${EnvName}-${CommonName}-{ApplicationName}-cicd-artifact-s3"
+      BucketName: !Sub "${EnvName}-${CommonName}-${ApplicationName}-artifact-s3"
       VersioningConfiguration: 
         Status: Suspended
       PublicAccessBlockConfiguration:
@@ -272,6 +272,7 @@ Resources:
                   - iam:DeleteRole
                   - iam:TagRole
                   - iam:UntagRole
+                  - iam:UpdateAssumeRolePolicy
                   - ecr:SetRepositoryPolicy
                   - ecr:GetRepositoryPolicy
                   - ecr:CreateRepository
