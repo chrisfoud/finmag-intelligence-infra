@@ -34,7 +34,7 @@ class VpcConfig:
 ##############################################################################################
 
 INTELLIGENCE_VPC = VpcConfig(
-    VPC_ID = 'Vpc',
+    VPC_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-vpc',
     VPC_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-vpc',
     VPC_CIDR = '10.0.0.0/16',    # VPC's CIDR block range
     MAX_AZS = 3,                 # Maximum number of Availability Zones to deploy
@@ -64,40 +64,6 @@ INTELLIGENCE_VPC = VpcConfig(
         )
     ]
 )
-
-# -------------------------------------------
-
-# INTELLIGENCE_VPC_2 = VpcConfig(
-#     VPC_ID = 'Vpc',
-#     VPC_NAME = 'cn-internal-vpc',
-#     VPC_CIDR = '100.0.0.0/16',    # VPC's CIDR block range
-#     MAX_AZS = 3,     # Maximum number of Availability Zones to deploy
-#     NAT_GATEWAYS = 0,    # Number of NAT Gateways to deploy
-#     INTERNET_GATEWAY = True,  # Create an IGW for public access
-#     SUBNET_LIST = [
-#         SubnetConfig(
-#             SUBNET_NAME = 'cn-internal-private-',
-#             SUBNET_TYPE = ec2.SubnetType.PRIVATE_WITH_EGRESS,
-#             SUBNET_MASK = 24
-#         ),
-        
-#         SubnetConfig(
-#             SUBNET_NAME = 'cn-internal-private-ext-',
-#             SUBNET_TYPE = ec2.SubnetType.PRIVATE_WITH_EGRESS,
-#             SUBNET_MASK = 24
-#         ),
-#         SubnetConfig(
-#             SUBNET_NAME = 'cn-internal-isolated-',
-#             SUBNET_TYPE = ec2.SubnetType.PRIVATE_ISOLATED,
-#             SUBNET_MASK = 24
-#         ),
-#         SubnetConfig(
-#             SUBNET_NAME = 'cn-internal-tgw-',
-#             SUBNET_TYPE = ec2.SubnetType.PRIVATE_WITH_EGRESS,
-#             SUBNET_MASK = 24
-#         )
-#     ]
-# )
 
 
 VPC_LIST = [INTELLIGENCE_VPC]
