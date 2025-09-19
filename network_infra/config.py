@@ -112,8 +112,8 @@ INTELLIGENCE_SG_RDS = SgConfig(
 )
 
 INTELLIGENCE_SG_REDIS = SgConfig(
-    SG_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-REDIS-sg',
-    SG_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-REDIS-sg',
+    SG_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-redis-sg',
+    SG_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-redis-sg',
     SG_DESCRIPTION = 'Redis SG',
     SG_VPC_NAME = INTELLIGENCE_VPC.VPC_NAME,
     SG_ALLOW_ALL_OUTBOUND = True,

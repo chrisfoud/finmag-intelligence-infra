@@ -80,7 +80,7 @@ INTELLIGENCE_REDIS_CACHE = RedisConfig(
     REDIS_NUM_NODES = 1,
     REDIS_AUTOMATIC_FAILOVER_ENABLED = False,
     REDIS_PORT = 6379,
-    REDIS_SECURITY_GROUP_IDS = network_config.INTELLIGENCE_SG_REDIS.SG_NAME,
+    REDIS_SECURITY_GROUP_IDS = [network_config.INTELLIGENCE_SG_REDIS.SG_NAME],
     REDIS_AT_REST_ENCRYPTION_ENABLED= True,   # Enable encryption at rest
     REDIS_TRANSIT_ENCRYPTION_ENABLED= True,   # Enable encryption in transit
     # Auth token for Redis

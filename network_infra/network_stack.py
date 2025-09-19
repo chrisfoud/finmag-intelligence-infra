@@ -67,6 +67,7 @@ class NetworkStack(Stack):
                 allow_all_outbound = sg_conf.SG_ALLOW_ALL_OUTBOUND,
                 allow_all_ipv6_outbound = sg_conf.SG_ALLOW_ALL_IPV6_OUTBOUND
             )
+            Tags.of(sg).add("Name", sg_conf.SG_NAME)
             for ingress_rule in sg_conf.SG_INGRESS_RULES:
                 sg.add_ingress_rule(
                     peer = ingress_rule.INGRESS_RULE_PEER,
