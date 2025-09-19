@@ -1,0 +1,40 @@
+version: 0.2
+
+env:
+  variables:
+    env_name: ${EnvName}
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 24
+      python: 3.13
+    commands:
+      - echo "Installing CDK and dependencies..."
+      - npm install -g aws-cdk@latest
+      - pip install --upgrade pip
+
+  pre_build:
+    commands:
+      - pip install -r requirements.txt
+      - echo "" >> common_config.py
+      - echo ${EnvName}
+      - echo ${CommonName}
+      - echo ${ApplicationName}
+      - echo "Add env variable to config"
+      - echo "ENV = '${EnvName}'" >> common_config.py
+      - echo "COMMON_NAME = '${CommonName}'" >> common_config.py
+      - echo "APP_NAME = '${ApplicationName}'" >> common_config.py
+      
+  build:
+    commands:
+      - echo "Deploying Network infrastructure..."
+      - cdk deploy S3-RDS-Elasticache-Stack --require-approval never
+
+  post_build:
+    commands:
+      - echo "Deployment completed successfully"
+      
+artifacts:
+  files:
+    - '**/*'
