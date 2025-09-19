@@ -43,9 +43,9 @@ class Redis(Stack):
         # Create Redis
         for redis_conf in config.REDIS_LIST:
 
-            redis_security_group = []
-            for i, redis_sg_name in enumerate(redis_conf.REDIS_SECURITY_GROUP_NAME):
-                redis_security_group.append(ec2.SecurityGroup.from_lookup_by_name(self, f'ImportedSG-{redis_conf.REDIS_ID}-{i}', redis_sg_name,imported_vpc))
+            redis_security_groups = []
+            for sg_name in redis_conf.REDIS_SECURITY_GROUP_IDS:
+                redis_security_groups.append(ec2.SecurityGroup.from_lookup_by_name(self, f'ImportedSG-{sg_name}', sg_name,imported_vpc))
 
 
             redis_subnet_group = elasticache.CfnSubnetGroup(
@@ -100,8 +100,8 @@ class RDS(Stack):
         for rds_conf in config.RDS_LIST:
             
             rds_security_groups = []
-            for i, sg_name in enumerate(rds_conf.RDS_SECURITY_GROUP_NAME):
-                rds_security_groups.append(ec2.SecurityGroup.from_lookup_by_name(self, f'ImportedSG-{rds_conf.RDS_ID}-{i}', sg_name,imported_vpc))
+            for sg_name in rds_conf.RDS_SECURITY_GROUP_NAME:
+                rds_security_groups.append(ec2.SecurityGroup.from_lookup_by_name(self, f'ImportedSG-{sg_name}', sg_name,imported_vpc))
 
             rds_subnet_group = rds.SubnetGroup(
                 self, rds_conf.RDS_ID + '-subnet-group',
