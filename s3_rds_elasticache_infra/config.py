@@ -8,6 +8,9 @@ from aws_cdk import (
 )
 from dataclasses import dataclass
 import common_config
+import network_infra.config as network_config
+
+IMPORTED_VPC_NAME = network_config.INTELLIGENCE_VPC.VPC_NAME
 
 @dataclass
 class S3Config:

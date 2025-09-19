@@ -160,24 +160,24 @@ Resources:
                 - Name: Network-BuildArtifact
               RunOrder: 1
 
-        # - Name: S3-RDS-Elasticache-Build
-        #   Actions:
-        #     - Name: BuildAction
-        #       ActionTypeId:
-        #         Category: Build
-        #         Owner: AWS
-        #         Provider: CodeBuild
-        #         Version: 1
-        #       Configuration:
-        #         ProjectName: 
-        #           Ref: CodeBuildS3RDSElasticacheCDN
-        #         PrimarySource: SourceArtifact
-        #       InputArtifacts:
-        #         - Name: SourceArtifact
-        #         - Name: Network-BuildArtifact
-        #       OutputArtifacts:
-        #         - Name: S3-RDS-Elasticache-BuildArtifact
-        #       RunOrder: 1      
+        - Name: S3-RDS-Elasticache-Build
+          Actions:
+            - Name: BuildAction
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              Configuration:
+                ProjectName: 
+                  Ref: CodeBuildS3RDSElasticache
+                PrimarySource: SourceArtifact
+              InputArtifacts:
+                - Name: SourceArtifact
+                - Name: Network-BuildArtifact
+              OutputArtifacts:
+                - Name: S3-RDS-Elasticache-BuildArtifact
+              RunOrder: 1      
 
   # Add CodeBuild Project and Role
   CodeBuildServiceRole:
@@ -314,37 +314,37 @@ Resources:
       Cache:
         Type: NO_CACHE
 
-  # CodeBuildS3RDSElasticacheCDN:
-  #   Type: AWS::CodeBuild::Project
-  #   Properties:
-  #     Name: 
-  #       Fn::Sub: "${AWS::StackName}-s3-rds-elasticache-build"
-  #     ServiceRole: 
-  #       Fn::GetAtt: [CodeBuildServiceRole, Arn]
-  #     Artifacts:
-  #       Type: CODEPIPELINE
-  #     Source:
-  #       Type: CODEPIPELINE
-  #       BuildSpec: buildspec-s3-rds-elasticache.yaml
-  #     Environment:
-  #       Type: LINUX_CONTAINER
-  #       ComputeType: BUILD_GENERAL1_SMALL
-  #       Image: aws/codebuild/standard:7.0
-  #       EnvironmentVariables:
-  #         - Name: EnvName
-  #           Type: PLAINTEXT
-  #           Value: !Sub '${EnvName}'
-  #         - Name: GitRepositoryName
-  #           Type: PLAINTEXT
-  #           Value: !Sub '${GitRepositoryName}'
-  #         - Name: ApplicationName
-  #           Type: PLAINTEXT
-  #           Value: !Sub '${ApplicationName}'   
-  #         - Name: CommonName
-  #           Type: PLAINTEXT
-  #           Value: !Sub '${CommonName}'
-  #     Cache:
-  #       Type: NO_CACHE
+  CodeBuildS3RDSElasticache:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: 
+        Fn::Sub: "${AWS::StackName}-s3-rds-elasticache-build"
+      ServiceRole: 
+        Fn::GetAtt: [CodeBuildServiceRole, Arn]
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec-s3-rds-elasticache.yaml
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        EnvironmentVariables:
+          - Name: EnvName
+            Type: PLAINTEXT
+            Value: !Sub '${EnvName}'
+          - Name: GitRepositoryName
+            Type: PLAINTEXT
+            Value: !Sub '${GitRepositoryName}'
+          - Name: ApplicationName
+            Type: PLAINTEXT
+            Value: !Sub '${ApplicationName}'   
+          - Name: CommonName
+            Type: PLAINTEXT
+            Value: !Sub '${CommonName}'
+      Cache:
+        Type: NO_CACHE
 
 Outputs:
   PipelineURL:

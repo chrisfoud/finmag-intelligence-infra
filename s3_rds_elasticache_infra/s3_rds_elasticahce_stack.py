@@ -17,14 +17,11 @@ class S3_RDS_Elasticache(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs: Any) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # Import VPC and Security group IDs
-        imported_vpc_id = ssm.StringParameter.value_from_lookup(self, '/' + common_config.ENV + '/' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '/' + 'vpc-id')
-
-        imported_redis_sg_id = ssm.StringParameter.value_from_lookup(self, '/' + common_config.ENV + '/' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '/' + 'redis-sg-id')
+        ######################################################################################################
+        # Import VPC IDs
+        imported_vpc_id = ssm.StringParameter.value_from_lookup(self, '/' + common_config.ENV + '/' + config.IMPORTED_VPC_NAME + '/' + 'vpc-id')
         
         imported_vpc = ec2.Vpc.from_lookup(self, 'ImportedVpcId', vpc_id = imported_vpc_id,)
-
-        imported_redis_sg = ec2.SecurityGroup.from_security_group_id(self, f'ImportedSG', security_group_id=imported_redis_sg_id)
 
         ######################################################################################################
         # Create S3 Buckets
