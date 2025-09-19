@@ -31,7 +31,7 @@ class ElasticacheConfig:
     ELASTICACHE_AUTOMATIC_FAILOVER_ENABLED: bool
     ELASTICACHE_PORT: int
     ELASTICACHE_PARAMETER_GROUP_NAME: str
-    ELASTICACHE_SUBNET_GROUP_NAME: str
+    ELASTICACHE_SUBNET_GROUP_NAME: list[str]
     ELASTICACHE_SECURITY_GROUP_NAME: str
     ELASTICACHE_AT_REST_ENCRYPTION_ENABLED: bool
     ELASTICACHE_TRANSIT_ENCRYPTION_ENABLED: bool
@@ -65,7 +65,7 @@ class RDSConfig:
     RDS_SECURITY_GROUP_NAME: list[str]
     RDS_ALLOCATED_STORAGE: int
     RDS_DATABASE_NAME: str
-   
+
 
 #################################################################
 """
@@ -87,40 +87,12 @@ BUCKET_LIST = [INTELLIGENCE_BUCKET]
 
 
 ################################################################
-"""
-Configuration for ElastiCache.
-
-Defines ElastiCache characteristics including engine, node type, version, number of nodes, port, parameter group, subnet group, and security group.
-"""
-
-INTELLIGENCE_REDIS_CACHE = ElasticacheConfig(
-    ELASTICACHE_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-Redis-Cache',
-    ELASTICACHE_DESCRIPTION = 'Redis Cache for RDS postgre',
-    ELASTICACHE_ENGINE = 'redis',
-    ELASTICACHE_NODE_TYPE = 'cache.t4g.micro',
-    ELASTICACHE_NUM_NODES = 1,
-    ELASTICACHE_AUTOMATIC_FAILOVER_ENABLED = False,
-    ELASTICACHE_PORT = 6379,
-    ELASTICACHE_PARAMETER_GROUP_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-redis-params',
-    ELASTICACHE_SUBNET_GROUP_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-redis-subnet-group',
-    ELASTICACHE_SECURITY_GROUP_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-redis-sg',
-    ELASTICACHE_AT_REST_ENCRYPTION_ENABLED= True,   # Enable encryption at rest
-    ELASTICACHE_TRANSIT_ENCRYPTION_ENABLED= True,   # Enable encryption in transit
-    # Auth token for Redis
-    ELASTICACHE_AUTH_TOKEN_CFN_ID  = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-redis-auth-token',
-    ELASTICACHE_AUTH_TOKEN_DESCRIPTION = 'Redis Auth Token',
-    ELASTICACHE_AUTH_TOKEN_LENGTH  = 32,
-    ELASTICACHE_AUTH_TOKEN_EXCLUDE_CHARS = r'/@"\ '
-)
-
-ELASTICACHE_LIST = [INTELLIGENCE_REDIS_CACHE]
-
-
+# Security Group Configuration
 
 INTELLIGENCE_SG_RDS = SgConfig(
     SG_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-rds-sg',
     SG_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-rds-sg',
-    SG_DESCRIPTION = 'ALB security group',
+    SG_DESCRIPTION = 'RDS security group',
     SG_ALLOW_ALL_OUTBOUND = True,
     SG_ALLOW_ALL_IPV6_OUTBOUND = True,
     SG_INGRESS_RULES = [
@@ -137,7 +109,52 @@ INTELLIGENCE_SG_RDS = SgConfig(
     ]
 )
 
-SG_LIST = [INTELLIGENCE_SG_RDS]
+INTELLIGENCE_SG_ELASTICACHE = SgConfig(
+    SG_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-elasticache-sg',
+    SG_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-elasticache-sg',
+    SG_DESCRIPTION = 'Redis SG',
+    SG_ALLOW_ALL_OUTBOUND = True,
+    SG_ALLOW_ALL_IPV6_OUTBOUND = True,
+    SG_INGRESS_RULES = [
+        IngressRuleConfig(
+            INGRESS_RULE_PEER = ec2.Peer.any_ipv4(),
+            INGRESS_RULE_PORT = ec2.Port.tcp(6379),
+            INGRESS_RULE_DESCRIPTION = 'Redis from ECS services'
+        ),
+    ]
+)
+
+SG_LIST = [INTELLIGENCE_SG_RDS,INTELLIGENCE_SG_ELASTICACHE]
+
+
+"""
+Configuration for ElastiCache.
+
+Defines ElastiCache characteristics including engine, node type, version, number of nodes, port, parameter group, subnet group, and security group.
+"""
+
+INTELLIGENCE_REDIS_CACHE = ElasticacheConfig(
+    ELASTICACHE_ID = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-Redis-Cache',
+    ELASTICACHE_DESCRIPTION = 'Redis Cache for RDS postgre',
+    ELASTICACHE_ENGINE = 'redis',
+    ELASTICACHE_NODE_TYPE = 'cache.t4g.micro',
+    ELASTICACHE_NUM_NODES = 1,
+    ELASTICACHE_AUTOMATIC_FAILOVER_ENABLED = False,
+    ELASTICACHE_PORT = 6379,
+    ELASTICACHE_PARAMETER_GROUP_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-redis-params',
+    ELASTICACHE_SUBNET_GROUP_NAME = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-redis-subnet-group',
+    ELASTICACHE_SECURITY_GROUP_NAME = [INTELLIGENCE_SG_ELASTICACHE.SG_NAME],
+    ELASTICACHE_AT_REST_ENCRYPTION_ENABLED= True,   # Enable encryption at rest
+    ELASTICACHE_TRANSIT_ENCRYPTION_ENABLED= True,   # Enable encryption in transit
+    # Auth token for Redis
+    ELASTICACHE_AUTH_TOKEN_CFN_ID  = common_config.ENV + '-' + common_config.COMMON_NAME + '-' + common_config.APP_NAME + '-redis-auth-token',
+    ELASTICACHE_AUTH_TOKEN_DESCRIPTION = 'Redis Auth Token',
+    ELASTICACHE_AUTH_TOKEN_LENGTH  = 32,
+    ELASTICACHE_AUTH_TOKEN_EXCLUDE_CHARS = r'/@"\ '
+)
+
+ELASTICACHE_LIST = [INTELLIGENCE_REDIS_CACHE]
+
 
 #################################################################
 

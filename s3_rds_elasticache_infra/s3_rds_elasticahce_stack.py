@@ -61,6 +61,10 @@ class S3_RDS_Elasticache(Stack):
         # Create ElastiCache
         for redis_conf in config.ELASTICACHE_LIST:
 
+            elasticache_security_groups = []
+            for sg_name in rds_conf.RDS_SECURITY_GROUP_NAME:
+                rds_security_groups.append(ec2.SecurityGroup.from_lookup_by_name(self, f'ImportedSG-{sg_name}', sg_name,imported_vpc))
+
             redis_subnet_group = elasticache.CfnSubnetGroup(
                 self, redis_conf.ELASTICACHE_ID + '-subnet-group',
                 cache_subnet_group_name = redis_conf.ELASTICACHE_ID + '-subnet-group',
@@ -90,7 +94,7 @@ class S3_RDS_Elasticache(Stack):
                 port = redis_conf.ELASTICACHE_PORT,
                 cache_subnet_group_name = redis_subnet_group.ref,
                 # amazonq-ignore-next-line
-                security_group_ids = [ec2.SecurityGroup.from_lookup_by_name(self, f'ImportedSG-{redis_conf.ELASTICACHE_SECURITY_GROUP_NAME}', redis_conf.ELASTICACHE_SECURITY_GROUP_NAME,imported_vpc).security_group_id],
+                security_group_ids = elasticache_security_groups,
                 at_rest_encryption_enabled = redis_conf.ELASTICACHE_AT_REST_ENCRYPTION_ENABLED,
                 transit_encryption_enabled = redis_conf.ELASTICACHE_TRANSIT_ENCRYPTION_ENABLED,
                 auth_token = redis_auth_token.secret_value.unsafe_unwrap(),
