@@ -18,7 +18,7 @@ network_stack = NetworkStack(app, "Network-Stack", env=env)
 # s3_rds_elasticache = S3_RDS_Elasticache(app, "S3-RDS-Elasticache-Stack", env=env)
 
 
-# Add dependency
-s3_rds_elasticache.add_dependency(network_stack)
+# Add dependency when S3-RDS-Elasticache stack is uncommented
+# s3_rds_elasticache.add_dependency(network_stack)
 
 app.synth()
