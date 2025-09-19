@@ -61,9 +61,7 @@ class S3_RDS_Elasticache(Stack):
         # Create ElastiCache
         for redis_conf in config.ELASTICACHE_LIST:
 
-            elasticache_security_groups = []
-            for sg_name in redis_conf.ELASTICACHE_SECURITY_GROUP_NAME:
-                elasticache_security_groups.append(ec2.SecurityGroup.from_lookup_by_name(self, f'ImportedSG-{sg_name}', sg_name,imported_vpc))
+            elasticache_security_groups = ec2.SecurityGroup.from_lookup_by_name(scope, id, redis_conf.ELASTICACHE_SECURITY_GROUP_NAME, imported_vpc)
 
             redis_subnet_group = elasticache.CfnSubnetGroup(
                 self, redis_conf.ELASTICACHE_ID + '-subnet-group',
