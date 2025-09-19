@@ -77,7 +77,9 @@ class S3_RDS_Elasticache(Stack):
                 description=redis_conf.ELASTICACHE_AUTH_TOKEN_DESCRIPTION,
                 generate_secret_string=secretsmanager.SecretStringGenerator(
                     password_length= redis_conf.ELASTICACHE_AUTH_TOKEN_LENGTH,
-                    exclude_characters= redis_conf.ELASTICACHE_AUTH_TOKEN_EXCLUDE_CHARS
+                    exclude_characters= redis_conf.ELASTICACHE_AUTH_TOKEN_EXCLUDE_CHARS,
+                    exclude_punctuation=True,
+                    include_space=False
                 )
             )
 
